@@ -18,17 +18,19 @@ namespace _2FA.Services
             connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
+
         public async Task<IEnumerable<Cuentas>> TodosLosRegistros()
         {
             using var connection = new SqlConnection(connectionString);
             return await connection.QueryAsync<Cuentas>(@"SELECT * FROM Cuentas", new { });
         }
 
+
         public async Task Crear(Cuentas cuentas)
         {
             using var connection = new SqlConnection(connectionString);
             var id = await connection
-                .QueryFirstOrDefaultAsync<int>(@"INSERT INTO Cuentas (Nombre, Contrasena)
+                .QueryFirstOrDefaultAsync<int>(@"INSERT INTO Cuentas (Nombre, Contrasena, Correo)
                  Values(@Nombre, @Contrasena, @Correo)
                   SELECT SCOPE_IDENTITY();", cuentas);
             cuentas.IdCuenta = id;
@@ -49,8 +51,10 @@ namespace _2FA.Services
 
             return await connection.QueryFirstOrDefaultAsync<string>(@"SELECT SecretCode FROM Cuentas
                 Where Correo= @Correo", new {Correo});
-
         }
+
+
+
     }
 }
 

@@ -18,6 +18,7 @@ namespace _2FA.Controllers
             _cuentasServices = cuentasServices;
         }
 
+
         [HttpGet("registros", Name = "GetRegistros")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Registros()
@@ -26,14 +27,18 @@ namespace _2FA.Controllers
             return Ok(Lista);
         }
 
+
+
         [HttpPost("crear", Name = "PostCrear")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> Crear(string nombre, string contrasena, string Correo)
+        public async Task<IActionResult> Crear(string nombre, string contrasena, string correo)
         {
-            var cuenta = new Cuentas { Nombre = nombre, Contrasena = contrasena };
+            var cuenta = new Cuentas { Nombre = nombre, Contrasena = contrasena, Correo = correo };
             await _cuentasServices.Crear(cuenta);
             return Ok();
         }
+
+
 
         [HttpGet, Route("GetQRCode")]
         public async Task<IActionResult> GetQRCode(string correo)
@@ -48,6 +53,7 @@ namespace _2FA.Controllers
             string imgHTML = $"<img src='{imgQR}'>";
             return Content(imgHTML, "text/html");
         }
+
 
 
         [HttpGet, Route("GetQRCodeAsImage")]
@@ -86,8 +92,10 @@ namespace _2FA.Controllers
             }
         }
 
+
+
         [HttpGet, Route("ValidarQRCode")]
-        public async Task<bool> ValidarCofdigo(string correo, string code)
+        public async Task<bool> ValidarCodigo(string correo, string code)
         {
 
             var secret = await _cuentasServices.GetSecret(correo);
@@ -95,6 +103,10 @@ namespace _2FA.Controllers
             var tfa = new TwoFactorAuth("DosFac", 6, 30, Algorithm.SHA256);
             return tfa.VerifyCode(secret, code);
         }
+
+
+
+
 
     }
 }
