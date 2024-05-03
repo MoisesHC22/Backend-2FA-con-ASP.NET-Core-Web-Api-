@@ -54,6 +54,13 @@ namespace _2FA.Services
         }
 
 
+        public async Task Borrar(int IdCuenta)
+        {
+            using var connection = new SqlConnection(connectionString);
+            await connection.ExecuteAsync("DELETE Cuentas WHERE IdCuenta=@IdCuenta", new { IdCuenta });
+        }
+
+
 
     }
 }

@@ -14,7 +14,7 @@ namespace _2FA.Controllers
         private readonly ICuentasServices _cuentasServices;
 
         public HomeController(ICuentasServices cuentasServices)
-        { 
+        {
             _cuentasServices = cuentasServices;
         }
 
@@ -34,6 +34,15 @@ namespace _2FA.Controllers
         public async Task<IActionResult> Crear(string nombre, string contrasena, string correo)
         {
             var cuenta = new Cuentas { Nombre = nombre, Contrasena = contrasena, Correo = correo };
+            await _cuentasServices.Crear(cuenta);
+            return Ok();
+        }
+
+        [HttpPost("signUp", Name = "PostSignUp")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> SignUp([FromBody] Recibir request)
+        {
+            var cuenta = new Cuentas { Nombre = request.Nombre, Contrasena = request.Contrasena, Correo = request.Correo };
             await _cuentasServices.Crear(cuenta);
             return Ok();
         }
@@ -104,6 +113,13 @@ namespace _2FA.Controllers
             return tfa.VerifyCode(secret, code);
         }
 
+        [HttpPost("Eliminar", Name = "PostEliminar")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> Eliminar(int IdCuenta)
+        {
+            await _cuentasServices.Borrar(IdCuenta);
+            return Ok();
+        }
 
 
 
