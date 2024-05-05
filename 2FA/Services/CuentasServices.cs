@@ -60,6 +60,13 @@ namespace _2FA.Services
             await connection.ExecuteAsync("DELETE Cuentas WHERE IdCuenta=@IdCuenta", new { IdCuenta });
         }
 
+        public async Task<bool> ValidarConContrasena(Cuentas cuentas) 
+        {
+            using var connection = new SqlConnection(connectionString);
+            var cuenta = await connection.QueryFirstOrDefaultAsync<Cuentas>(@"SELECT * FROM Cuentas WHERE Correo = @Correo AND Contrasena = @Contrasena", cuentas);
+
+            return cuenta != null;
+        }
 
 
     }

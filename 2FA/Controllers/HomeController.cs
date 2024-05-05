@@ -46,19 +46,21 @@ namespace _2FA.Controllers
         }
 
 
-        [HttpGet, Route("GetQRCode")]
-        public async Task<IActionResult> GetQRCode(string correo)
+
+        [HttpPost, Route("Activar2FA")]
+        public async Task<IActionResult> Activar2FA([FromBody] Recibir request)
         {
             var tfa = new TwoFactorAuth("DosFac", 6, 30, Algorithm.SHA256, new ImageChartsQrCodeProvider());
             var secret = tfa.CreateSecret(160);
 
-            var cuentas = new Cuentas { Correo = correo, SecretCode = secret };
+            var cuentas = new Cuentas { Correo = request.Correo, SecretCode = secret };
             await _cuentasServices.SetSecret(cuentas);
 
-            string imgQR = tfa.GetQrCodeImageAsDataUri(correo, secret);
+            string imgQR = tfa.GetQrCodeImageAsDataUri(request.Correo, secret);
             string imgHTML = $"<img src='{imgQR}'>";
             return Content(imgHTML, "text/html");
         }
+
 
 
         [HttpGet, Route("GetQRCodeAsImage")]
@@ -79,16 +81,17 @@ namespace _2FA.Controllers
                 imgQR = imgQR.Substring("data:image/png;base64,".Length);
 
                 // Intentar convertir la cadena base64 a un arreglo de bytes
-                try
-                {
-                    byte[] picture = Convert.FromBase64String(imgQR);
-                    return File(picture, "image/png");
-                }
-                catch (FormatException ex)
-                {
-                    // Manejar el error de conversión
-                    return StatusCode(500, "Error al convertir la cadena base64 a un arreglo de bytes: " + ex.Message);
-                }
+                //try
+                //{
+                //    byte[] picture = Convert.FromBase64String(imgQR);
+                //    return File(picture, "image/png");
+                //}
+                //catch (FormatException ex)
+                //{
+                //    // Manejar el error de conversión
+                //    return StatusCode(500, "Error al convertir la cadena base64 a un arreglo de bytes: " + ex.Message);
+                //}
+                return Ok(new { qrCode = imgQR });
             }
             else
             {
@@ -97,14 +100,27 @@ namespace _2FA.Controllers
             }
         }
 
+
+
+
         [HttpGet, Route("ValidarQRCode")]
-        public async Task<bool> ValidarCodigo(string correo, string code)
+        public async Task<IActionResult> ValidarCodigo(string correo, string code)
         {
+            var cuenta = new Cuentas { Correo = correo, Contrasena = code};
 
-            var secret = await _cuentasServices.GetSecret(correo);
+           var result = await _cuentasServices.ValidarConContrasena(cuenta);
 
-            var tfa = new TwoFactorAuth("DosFac", 6, 30, Algorithm.SHA256);
-            return tfa.VerifyCode(secret, code);
+            if (result) 
+            {
+                return Ok(200);
+
+            }else{
+                var secret = await _cuentasServices.GetSecret(correo);
+
+                var tfa = new TwoFactorAuth("DosFac", 6, 30, Algorithm.SHA256);
+                return Ok(tfa.VerifyCode(secret, code));
+            }
+
         }
 
 

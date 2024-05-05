@@ -9,5 +9,7 @@ namespace _2FA.Infraestructura
         Task<string> GetSecret(string Correo);
         Task SetSecret(Cuentas cuentas);
         Task<IEnumerable<Cuentas>> TodosLosRegistros();
+
+        Task<bool> ValidarConContrasena(Cuentas cuentas);
     }
 }
